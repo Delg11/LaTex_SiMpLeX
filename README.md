@@ -51,6 +51,76 @@ display(Math('\\text{Simplex Solution:}' + result))
 
 ## Examples
 
+Initial input:
+```latex
+    \text{Min Z} &= -2x_1 - x_2 \\
+    \text{sujeito a:}&\quad 3x_1 + x_2 \leq 9 \\
+    &\quad 2x_1 - 2x_2 \leq 3 \\
+    &\quad 0 \leq x_1 \leq 1 \\
+    &\quad 0 \leq x_2 \leq 8
+```
+
+Final output:
+```latex
+\text{Tableau inicial:}
+\[
+\begin{array}{|c|cccccc|c|}
+\hline
+\text{VB} & x_1 & x_2 & x_3 & x_4 & x_5 & x_6 & \text{b} \\
+\hline
+{x_2} & 3 & 1 & 1 & 0 & 0 & 0 & 9 \\
+{x_4} & 2 & -2 & 0 & 1 & 0 & 0 & 3 \\
+{x_1} & 1 & 0 & 0 & 0 & 1 & 0 & 1 \\
+{x_6} & 0 & 1 & 0 & 0 & 0 & 1 & 8 \\
+\hline
+\text{-Z} & -2 & -1 & 0 & 0 & 0 & 0 & 0 \\
+\hline
+\end{array}
+\]
+Tableau após pivoteamento inicial para forma canônica:
+\[
+\begin{array}{|c|cccccc|c|}
+\hline
+\text{VB} & x_1 & x_2 & x_3 & x_4 & x_5 & x_6 & \text{b} \\
+\hline
+{x_2} & 0 & 1 & 1 & 0 & -3 & 0 & 6 \\
+{x_4} & 0 & 0 & 2 & 1 & -8 & 0 & 13 \\
+{x_1} & 1 & 0 & 0 & 0 & 1 & 0 & 1 \\
+{x_6} & 0 & 0 & -1 & 0 & 3 & 1 & 2 \\
+\hline
+\text{-Z} & 0 & 0 & 1 & 0 & -1 & 0 & 8 \\
+\hline
+\end{array}
+\]
+
+\text{Iteração 1:}
+\text{Candidato a entrar na base: } \(x_5\).\\
+\text{Teste da razão para verificar quem sai da base:}\\
+\( x_2:\dfrac{6}{-3}=\nexists, x_4:\dfrac{13}{-8}=\nexists, x_1:\dfrac{1}{1}=1, { \color{red}{x_6:\dfrac{2}{3}=\sfrac{2}{3}} } \)\\
+\text{Candidato a sair da base: } \(x_6\).\\
+
+\text{Novo Tableau:}
+\[
+\begin{array}{|c|cccccc|c|}
+\hline
+\text{VB} & x_1 & x_2 & x_3 & x_4 & x_5 & x_6 & \text{b} \\
+\hline
+{x_2} & 0 & 1 & 0 & 0 & 0 & 1 & 8 \\
+{x_4} & 0 & 0 & \sfrac{-2}{3} & 1 & 0 & \sfrac{8}{3} & \sfrac{55}{3} \\
+{x_1} & 1 & 0 & \sfrac{1}{3} & 0 & 0 & \sfrac{-1}{3} & \sfrac{1}{3} \\
+{x_5} & 0 & 0 & \sfrac{-1}{3} & 0 & 1 & \sfrac{1}{3} & \sfrac{2}{3} \\
+\hline
+\text{-Z} & 0 & 0 & \sfrac{2}{3} & 0 & 0 & \sfrac{1}{3} & \sfrac{26}{3} \\
+\hline
+\end{array}
+\]
+
+\text{Iteração 2:}
+Nenhum coeficiente negativo para variáveis não básicas na linha do objetivo. Solução ótima alcançada.
+Como não temos mais valores de custo negativo, a solução atual,  \(z=-26/3\), é ótima. 
+A solução \(\left(1/3,8,0,55/3,2/3,0\right)^T\) é a única partição básica ótima.
+```
+
 See the `examples/` folder for Jupyter notebooks demonstrating both components.
 
 ## License
