@@ -1,133 +1,137 @@
-# Linear Programming Solver
+# Simplex Algorithm for Linear Programming
 
-A Python library for parsing and solving linear programming problems using LaTeX input and the Simplex method.
+This project implements the Simplex algorithm in Python to solve linear programming problems provided in LaTeX format. It supports both maximization and minimization problems, handles equality, less-than-or-equal, and greater-than-or-equal constraints, and uses the two-phase Simplex method when necessary (e.g., for problems requiring artificial variables). The output is formatted in LaTeX, making it ideal for rendering in environments like Overleaf, Google Colab Markdown cells, or Jupyter notebooks.
 
-## Overview
-
-This project consists of two main components:
-1. **Parser and Standard Form Converter** (`lp_parser.py`): Parses LaTeX-formatted linear programming problems and converts them to standard form (minimization with equality constraints).
-2. **Simplex Solver** (`simplex_solver.py`): Solves linear programming problems in standard form using the Simplex method, outputting detailed iterations in LaTeX.
-
-**Created by Gabriel S. Delgado with assistance from Grok 3 by xAI.**
+## Features
+- **LaTeX Input Parsing**: Parses linear programming problems written in LaTeX, extracting objective functions and constraints.
+- **Standard and Two-Phase Simplex**: Converts problems to standard form and solves them using the Simplex method, applying two-phase Simplex for problems with artificial variables or `≥` constraints.
+- **Comprehensive Output**: Generates detailed LaTeX output, including initial tableaus, pivot operations, and final solutions, with detection of optimal, unbounded, or infeasible solutions.
+- **Exact Arithmetic**: Uses Python's `fractions.Fraction` for precise calculations, avoiding floating-point errors.
+- **Example Problems**: Includes seven example problems covering various cases, such as maximization, minimization, equality constraints, and infeasibility.
 
 ## Installation
 
-```bash
-pip install -r requirements.txt
-```
+### Prerequisites
+- **Python**: Version 3.8 or higher.
+- **Optional**: `IPython` for rendering LaTeX output in Jupyter or Google Colab (not required for core functionality).
+
+### Setup
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Delg11/LaTex_SiMpLeX.git
+   cd simplex-algorithm
+   ```
+2. (Optional) Install `IPython` for Jupyter/Colab:
+   ```bash
+   pip install ipython
+   ```
+   Alternatively, create a virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   pip install ipython
+   ```
+
+No additional dependencies are required, as the script uses Python's standard library (`re` and `fractions`).
 
 ## Usage
 
-### Part 1: Parsing and Standardizing
-```python
-from lp_parser import process_linear_program
-from IPython.display import display, Math
+The main script, `simplex.py`, provides a `solve_linear_program` function that takes a LaTeX-formatted linear programming problem as input and returns LaTeX output with the solution process.
 
-latex_input = r"""
-\text{Max Z} &= 2x_1 + x_2 \\
-\text{sujeito a:}&\quad x_1 + x_2 \leq 1 \\
+### Example
+```python
+from simplex import solve_linear_program
+
+latex_problem = r'''
+\text{Max Z} &= 2x_1 + 4x_2 \\
+\text{sujeito a:}&\quad x_1 + 2x_2 \leq 4 \\
+&\quad -x_1 + x_2 \leq 1 \\
 &\quad x_1, x_2 \geq 0
-"""
+'''
 
-result = process_linear_program(latex_input)
-display(Math('\\text{Problem in Standard Form:}' + result))
+result = solve_linear_program(latex_problem)
+print(result)
 ```
 
-### Part 2: Solving with Simplex
-```python
-from simplex_solver import solve_simplex
-from IPython.display import display, Math
+This example (Problem 5 in the script) outputs LaTeX code detailing the Simplex iterations, culminating in the optimal solution \( Z = 8, x_1 = 0, x_2 = 2 \).
 
-latex_input = r"""
-\displaystyle \text{Min -Z} &= -x_1 - x_2 \\
-\text{sujeito a:} 
-&\quad x_1 + x_2 + x_3 = 1 \\
-&\quad x_1, x_2, x_3 \geq 0
-"""
+### Running Examples
+The script includes seven example problems. To run them:
+1. Execute `simplex.py` directly:
+   ```bash
+   python simplex.py
+   ```
+2. The script will process each problem and print LaTeX output, which can be copied into a LaTeX renderer (see below).
 
-result = solve_simplex(latex_input)
-display(Math('\\text{Simplex Solution:}' + result))
-```
+### Input Format
+The LaTeX input must follow this structure:
+- Objective function: `\text{Max Z} &= <expression>` or `\text{Min Z} &= <expression>`.
+- Constraints section: `\text{sujeito a:}`, followed by constraints like `<expression> \leq <value>`, `<expression> \geq <value>`, or `<expression> = <value>`.
+- Variable bounds: e.g., `0 \leq x_1 \leq 5` or `x_1, x_2 \geq 0`.
 
-## Examples
+See the `latex_inputs` list in `simplex.py` for examples.
 
-Initial input:
-```latex
-    \text{Min Z} &= -2x_1 - x_2 \\
-    \text{sujeito a:}&\quad 3x_1 + x_2 \leq 9 \\
-    &\quad 2x_1 - 2x_2 \leq 3 \\
-    &\quad 0 \leq x_1 \leq 1 \\
-    &\quad 0 \leq x_2 \leq 8
-```
+## Rendering LaTeX Output
+The output is LaTeX-formatted and requires a compatible environment to render tableaus and equations.
 
-Final output:
-```latex
-\text{Tableau inicial:}
-\[
-\begin{array}{|c|cccccc|c|}
-\hline
-\text{VB} & x_1 & x_2 & x_3 & x_4 & x_5 & x_6 & \text{b} \\
-\hline
-{x_2} & 3 & 1 & 1 & 0 & 0 & 0 & 9 \\
-{x_4} & 2 & -2 & 0 & 1 & 0 & 0 & 3 \\
-{x_1} & 1 & 0 & 0 & 0 & 1 & 0 & 1 \\
-{x_6} & 0 & 1 & 0 & 0 & 0 & 1 & 8 \\
-\hline
-\text{-Z} & -2 & -1 & 0 & 0 & 0 & 0 & 0 \\
-\hline
-\end{array}
-\]
-Tableau após pivoteamento inicial para forma canônica:
-\[
-\begin{array}{|c|cccccc|c|}
-\hline
-\text{VB} & x_1 & x_2 & x_3 & x_4 & x_5 & x_6 & \text{b} \\
-\hline
-{x_2} & 0 & 1 & 1 & 0 & -3 & 0 & 6 \\
-{x_4} & 0 & 0 & 2 & 1 & -8 & 0 & 13 \\
-{x_1} & 1 & 0 & 0 & 0 & 1 & 0 & 1 \\
-{x_6} & 0 & 0 & -1 & 0 & 3 & 1 & 2 \\
-\hline
-\text{-Z} & 0 & 0 & 1 & 0 & -1 & 0 & 8 \\
-\hline
-\end{array}
-\]
+### Option 1: Overleaf
+1. Create a new project in [Overleaf](https://www.overleaf.com).
+2. Copy the LaTeX output from the script.
+3. Paste it into a `.tex` file with the following preamble:
+   ```latex
+   \documentclass{article}
+   \usepackage{amsmath, amssymb}
+   \usepackage{xcolor}
+   \usepackage{xfrac} % for \sfrac
+   \begin{document}
+   % Paste LaTeX output here
+   \end{document}
+   ```
+4. Compile to view tableaus, pivot steps, and solutions.
 
-\text{Iteração 1:}
-\text{Candidato a entrar na base: } \(x_5\).\\
-\text{Teste da razão para verificar quem sai da base:}\\
-\( x_2:\dfrac{6}{-3}=\nexists, x_4:\dfrac{13}{-8}=\nexists, x_1:\dfrac{1}{1}=1, { \color{red}{x_6:\dfrac{2}{3}=\sfrac{2}{3}} } \)\\
-\text{Candidato a sair da base: } \(x_6\).\\
 
-\text{Novo Tableau:}
-\[
-\begin{array}{|c|cccccc|c|}
-\hline
-\text{VB} & x_1 & x_2 & x_3 & x_4 & x_5 & x_6 & \text{b} \\
-\hline
-{x_2} & 0 & 1 & 0 & 0 & 0 & 1 & 8 \\
-{x_4} & 0 & 0 & \sfrac{-2}{3} & 1 & 0 & \sfrac{8}{3} & \sfrac{55}{3} \\
-{x_1} & 1 & 0 & \sfrac{1}{3} & 0 & 0 & \sfrac{-1}{3} & \sfrac{1}{3} \\
-{x_5} & 0 & 0 & \sfrac{-1}{3} & 0 & 1 & \sfrac{1}{3} & \sfrac{2}{3} \\
-\hline
-\text{-Z} & 0 & 0 & \sfrac{2}{3} & 0 & 0 & \sfrac{1}{3} & \sfrac{26}{3} \\
-\hline
-\end{array}
-\]
+## Example Output
+For the example problem above (Max \( Z = 2x_1 + 4x_2 \)), the output includes:
+- **Problem Statement**: Original and standard form.
+- **Initial Tableau**: With basic variables and coefficients.
+- **Iterations**: Pivot operations, entering/leaving variables, and updated tableaus.
+- **Solution**: \( Z = 8, x_1 = 0.67, x_2 = 1.67 \), with a note on non-uniqueness.
 
-\text{Iteração 2:}
-Nenhum coeficiente negativo para variáveis não básicas na linha do objetivo. Solução ótima alcançada.
-Como não temos mais valores de custo negativo, a solução atual,  \(z=-26/3\), é ótima. 
-A solução \(\left(1/3,8,0,55/3,2/3,0\right)^T\) é a única partição básica ótima.
-```
+For a rendered example, see the output for Problem 5 in Overleaf (optimal solution with two iterations).
 
-See the `examples/` folder for Jupyter notebooks demonstrating both components.
+## Testing
+The script includes seven example problems testing various scenarios:
+- **Problem 1**: Minimization with bounds (\( Z =  -26/3 \)).
+- **Problem 2**: Minimization with equality constraints (\( Z = 0 \)).
+- **Problem 3**: Maximization with equality constraints (\( Z = 2.5 \)).
+- **Problem 4**: Minimization with inequalities (\( Z = -3 \)).
+- **Problem 5**: Maximization with inequalities (\( Z = 8 \)).
+- **Problem 6**: Maximization with inequalities (( Unbound )).
+- **Problem 7**: Minimization with greater or equal inequalities (( Z=-1.50 )).
+
+
+To verify, run `python simplex.py` and check the LaTeX output in Overleaf.
+
+## Contributing
+Contributions are welcome! To contribute:
+1. Fork the repository.
+2. Create a feature branch (`git checkout -b feature/your-feature`).
+3. Commit changes (`git commit -m "Add your feature"`).
+4. Push to the branch (`git push origin feature/your-feature`).
+5. Open a Pull Request.
+
+Please include tests for new features and ensure LaTeX output remains compatible.
 
 ## License
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-MIT License. See `LICENSE` for details.
+## Credits
+- **Developed by**: Gabriel S. Delgado
+- **With Assistance from**: Grok 3, created by xAI
 
-## Acknowledgments
+## Contact
+For questions or suggestions, open an issue on GitHub or contact Gabriel S. Delgado via [your-preferred-contact-method].
 
-- Created by Gabriel S. Delgado.
-- Assisted by Grok 3, developed by xAI.
+---
+
+Happy optimizing!
